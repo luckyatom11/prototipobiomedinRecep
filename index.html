@@ -822,7 +822,7 @@ function agregarAlCarrito(analisis) {
 function actualizarTotal() {
   var totalSpan = document.querySelector('#screen-registro .text-2xl');
   if (!totalSpan) return;
-  var rows = document.querySelectorAll('#screen-registro .overflow-hidden table tbody tr');
+  var rows = document.querySelectorAll('#screen-registro .overflow-hidden table:not(#abonos-table) tbody tr');
   var total = 0;
   rows.forEach(function(row) {
     var precioText = row.querySelectorAll('td')[1];
@@ -849,7 +849,7 @@ function agregarAbono() {
     return;
   }
 
-  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table tbody tr');
+  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table:not(#abonos-table) tbody tr');
   var totalCarrito = 0;
   carritoRows.forEach(function(row) {
     var precioText = row.querySelectorAll('td')[1];
@@ -908,7 +908,7 @@ function actualizarAbonosUI() {
 
   if (!totalCarritoEl || !totalAbonadoEl || !saldoPendienteEl) return;
 
-  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table tbody tr');
+  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table:not(#abonos-table) tbody tr');
   var totalCarrito = 0;
   carritoRows.forEach(function(row) {
     var precioText = row.querySelectorAll('td')[1];
@@ -956,13 +956,12 @@ function guardarOrden() {
     return;
   }
 
-  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table tbody tr');
+  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table:not(#abonos-table) tbody tr');
   if (carritoRows.length === 0) {
     alert('Agregue al menos un an\u00e1lisis al carrito');
     return;
   }
 
-  var estudio = carritoRows[0].querySelectorAll('td')[0].textContent;
   var totalCarrito = 0;
   carritoRows.forEach(function(row) {
     var precioText = row.querySelectorAll('td')[1];
@@ -993,22 +992,27 @@ function guardarOrden() {
   var tbody = document.querySelector('#screen-dashboard .overflow-hidden table tbody');
   if (!tbody) return;
 
-  var tr = document.createElement('tr');
-  tr.className = 'hover:bg-slate-50/50 transition-colors';
-  tr.innerHTML =
-    '<td class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">' + fecha + '</td>' +
-    '<td class="px-6 py-4 text-sm font-semibold text-biomedin-blue">' + nombre.value.trim() + '</td>' +
-    '<td class="px-6 py-4 text-sm">' + estudio + '</td>' +
-    '<td class="px-6 py-4 text-sm text-slate-500">' + (medico && medico.value.trim() ? medico.value.trim() : 'A quien Corresponda') + '</td>' +
-    '<td class="px-6 py-4"><div class="flex justify-center items-center gap-3">' +
-    '<button class="p-1.5 text-slate-300 cursor-not-allowed btn-impresora" title="Imprimir" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
-    '<button class="p-1.5 text-slate-300 cursor-not-allowed btn-descargar" title="Descargar" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
-    '<button class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all marcar-pagado" title="Marcar como pagado" onclick="marcarPagado(this)"' + pagadoStyle + '><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
-    '</div></td>' +
-    '<td class="px-6 py-4 estado-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pendiente</span></td>' +
-    '<td class="px-6 py-4 saldo-badge">' + saldoBadge + '</td>';
+  var nombrePaciente = nombre.value.trim();
+  var medicoNombre = medico && medico.value.trim() ? medico.value.trim() : 'A quien Corresponda';
 
-  tbody.appendChild(tr);
+  carritoRows.forEach(function(row) {
+    var estudio = row.querySelectorAll('td')[0].textContent;
+    var tr = document.createElement('tr');
+    tr.className = 'hover:bg-slate-50/50 transition-colors';
+    tr.innerHTML =
+      '<td class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">' + fecha + '</td>' +
+      '<td class="px-6 py-4 text-sm font-semibold text-biomedin-blue">' + nombrePaciente + '</td>' +
+      '<td class="px-6 py-4 text-sm">' + estudio + '</td>' +
+      '<td class="px-6 py-4 text-sm text-slate-500">' + medicoNombre + '</td>' +
+      '<td class="px-6 py-4"><div class="flex justify-center items-center gap-3">' +
+      '<button class="p-1.5 text-slate-300 cursor-not-allowed btn-impresora" title="Imprimir" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
+      '<button class="p-1.5 text-slate-300 cursor-not-allowed btn-descargar" title="Descargar" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
+      '<button class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all marcar-pagado" title="Marcar como pagado" onclick="marcarPagado(this)"' + pagadoStyle + '><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
+      '</div></td>' +
+      '<td class="px-6 py-4 estado-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pendiente</span></td>' +
+      '<td class="px-6 py-4 saldo-badge">' + saldoBadge + '</td>';
+    tbody.appendChild(tr);
+  });
 
   showScreen('dashboard');
   limpiarRegistro();
@@ -1017,7 +1021,7 @@ function guardarOrden() {
 function limpiarRegistro() {
   var inputs = document.querySelectorAll('#screen-registro input, #screen-registro select, #screen-registro textarea');
   inputs.forEach(function(el) { el.value = ''; });
-  var carritoTbody = document.querySelector('#screen-registro .overflow-hidden table tbody');
+  var carritoTbody = document.querySelector('#screen-registro .overflow-hidden table:not(#abonos-table) tbody');
   if (carritoTbody) carritoTbody.innerHTML = '';
   var abonosTbody = document.querySelector('#abonos-table tbody');
   if (abonosTbody) abonosTbody.innerHTML = '';
