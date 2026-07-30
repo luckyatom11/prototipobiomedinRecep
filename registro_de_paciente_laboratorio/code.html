@@ -1,0 +1,262 @@
+<!DOCTYPE html><html lang="es" style="width: 1280px; height: 1024px; overflow: hidden; position: relative;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Registro de Paciente - BioMedin Laboratorios</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'biomedin-blue': '#1a3a8a', // Dark blue from logo
+          'biomedin-teal': '#2dd4bf', // Teal/Cyan from logo
+          'biomedin-teal-dark': '#0d9488',
+          'biomedin-teal-light': '#f0fdfa',
+        }
+      }
+    }
+  }
+</script>
+<style data-purpose="custom-typography">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+<style data-purpose="clinical-theme">
+    :root {
+      --clinical-blue-900: #1a3a8a;
+      --clinical-blue-600: #1a3a8a;
+      --clinical-blue-50: #f0fdfa;
+    }
+    .active-nav-item {
+      background-color: #1a3a8a;
+      color: white;
+    }
+  </style>
+<link data-snapdom="injected-import" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+<!-- BEGIN: SideNavBar -->
+<aside class="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0" data-purpose="sidebar-navigation">
+<div class="p-4 border-b border-gray-100 flex items-center justify-center">
+<img alt="BioMedin Logo" class="h-16 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuJF0K_Kw8NmOFPCVCDuXzUOeF1F68vcH4ugW3-cTAtHws5UL0MsuDj7I9x1dgIA6lpe96A-7rNDEQug85Jed40L4NSvjpV4FibAtjPvvAie-O53wIjHZ4S39vkWq2XJyecjUYeo5VTwab_P7qE5EovsGkmOzyn9MQh9w4WjVNTuVO-CB4X2ZjL4cQiTTGKjRacz7NkcCkwzuT9LFWgdc6PIZPGEbvhGiYtlny3EPiZn717JfGltkdWjQe37MXotwWsw">
+</div>
+<nav class="flex-1 p-4 space-y-2">
+<a class="flex items-center gap-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="">Inicio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white rounded-lg font-semibold transition-colors bg-biomedin-teal" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="font-medium">Añadir Paciente</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors" href="#"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg><span class="">Análisis Clínicos</span></a>
+</nav>
+<div class="p-4 border-t border-gray-100">
+<button class="flex items-center gap-3 w-full p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="">Cerrar sesión</span>
+</button>
+</div>
+</aside>
+<!-- END: SideNavBar -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- BEGIN: TopNavBar -->
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10" data-purpose="top-navigation-bar">
+<div class="flex items-center gap-8">
+<div class="flex flex-col">
+<span class="text-xs text-gray-500 uppercase font-semibold">Sucursal</span>
+<span class="text-sm font-medium text-gray-900">Sucursal Central - CDMX</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col text-right">
+<span class="text-xs text-gray-500 uppercase font-semibold">Nombre Recepcionista</span>
+<span class="text-sm font-medium text-gray-900">Ana Karen Martínez</span>
+</div>
+<div class="flex items-center gap-4 border-l pl-6">
+<button class="relative p-2 text-gray-400 hover:text-biomedin-teal transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="absolute top-2 right-2 w-2 h-2 bg-biomedin-teal rounded-full border-2 border-white"></span>
+</button>
+<div class="w-10 h-10 rounded-full bg-biomedin-teal-light flex items-center justify-center overflow-hidden border border-biomedin-teal/20">
+<svg class="w-6 h-6 text-biomedin-teal-dark" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopNavBar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 overflow-y-auto p-8" data-purpose="registration-form-container">
+<div class="max-w-4xl mx-auto">
+<h1 class="text-3xl font-bold text-gray-900 mb-8" data-purpose="main-title">Registro de Paciente</h1>
+<!-- BEGIN: Section 1 - Información Personal -->
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6" data-purpose="personal-info-section">
+<div class="flex items-center gap-2 mb-6">
+<div class="w-1.5 h-6 bg-biomedin-teal rounded-full"></div>
+<h2 class="text-xl font-bold text-gray-800">Información Personal</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div data-purpose="input-group">
+<label class="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
+<input class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Ej. Juan Carlos" type="text">
+</div>
+<div data-purpose="input-group">
+<label class="block text-sm font-semibold text-gray-700 mb-2">Apellidos</label>
+<input class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Ej. Pérez García" type="text">
+</div>
+<div data-purpose="input-group">
+<label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Nacimiento <span class="text-gray-400 font-normal">(opcional)</span></label>
+<input id="fecha-nacimiento" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" type="date" onchange="calcularEdad()">
+</div>
+<div data-purpose="input-group">
+<label class="block text-sm font-semibold text-gray-700 mb-2">Edad</label>
+<input id="edad" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Ej. 3 años, 6 meses, 15 días" type="text">
+<input id="edad-anios" type="hidden" value="">
+</div><div class="" data-purpose="input-group">
+<label class="block text-sm font-semibold text-gray-700 mb-2">Número telefónico <span class="text-gray-400 font-normal">(opcional)</span></label>
+<input class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="55 1234 5678" type="tel">
+</div>
+</div>
+</section>
+<!-- END: Section 1 -->
+<!-- BEGIN: Section 2 - Análisis Clínicos -->
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6" data-purpose="clinical-analysis-section">
+<div class="flex items-center gap-2 mb-6">
+<div class="w-1.5 h-6 bg-biomedin-teal rounded-full"></div>
+<h2 class="text-xl font-bold text-gray-800">Análisis Clínicos</h2>
+</div>
+<!-- Search and Quick Add -->
+<div class="mb-8">
+<div class="relative mb-4">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-biomedin-teal focus:border-biomedin-teal sm:text-sm" placeholder="Buscar análisis..." type="text">
+</div>
+<div class="border border-gray-100 rounded-lg divide-y divide-gray-100" data-purpose="available-analysis-list">
+</div>
+</div>
+<!-- Selected Analysis Table -->
+<div class="overflow-hidden border border-gray-200 rounded-lg mb-8" data-purpose="selected-items-table">
+<table class="min-w-full divide-y divide-gray-200">
+<thead class="bg-biomedin-blue">
+<tr>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider" scope="col">Análisis Clínico</th>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider" scope="col">Precio</th>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider" scope="col">Acción</th>
+</tr>
+</thead>
+<tbody class="bg-white divide-y divide-gray-200">
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Coprológico</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">$200.00</td>
+<td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+<button class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg transition-colors">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Examen General de Orina</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">$80.00</td>
+<td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+<button class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg transition-colors">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Payment and Total -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 border-t border-gray-100 pt-6">
+<div class="flex items-center gap-4" data-purpose="payment-selection">
+<label class="text-sm font-semibold text-gray-700">Tipo de pago:</label>
+<select class="border-gray-300 rounded-lg text-sm focus:ring-biomedin-teal focus:border-biomedin-teal min-w-[160px]">
+<option>T. Crédito</option>
+<option>Efectivo</option>
+<option>T. Débito</option>
+<option>Transferencia</option>
+</select>
+</div>
+<div class="flex items-center gap-4" data-purpose="total-display">
+<span class="text-sm font-semibold text-gray-700 uppercase">Total:</span>
+<div class="bg-biomedin-teal-light border-2 border-biomedin-teal/20 rounded-lg px-6 py-2">
+<span class="text-2xl font-bold text-biomedin-blue">$280.00</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Section 2 -->
+<!-- BEGIN: Section 3 - Observaciones -->
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-12" data-purpose="observations-section">
+<label class="block text-sm font-semibold text-gray-700 mb-3">Observaciones</label>
+<textarea class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Notas adicionales sobre la toma de muestra o condiciones del paciente..." rows="4"></textarea>
+</section>
+<!-- END: Section 3 -->
+<!-- BEGIN: Form Actions -->
+<div class="flex justify-end gap-4 mb-12" data-purpose="action-buttons">
+<button class="px-8 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-all focus:ring-2 focus:ring-gray-200">
+            Cancelar
+          </button>
+<button class="px-10 py-3 bg-biomedin-blue text-white rounded-lg font-bold shadow-md shadow-blue-900/20 hover:bg-biomedin-blue/90 transition-all focus:ring-4 focus:ring-biomedin-blue/10">
+            Guardar
+          </button>
+</div>
+<!-- END: Form Actions -->
+</div>
+</main>
+<!-- END: MainContent -->
+</div>
+
+
+
+<script>
+function calcularEdad() {
+  var fechaInput = document.getElementById('fecha-nacimiento');
+  var edadInput = document.getElementById('edad');
+  if (!fechaInput || !edadInput) return;
+
+  if (!fechaInput.value) {
+    edadInput.readOnly = false;
+    edadInput.value = '';
+    edadInput.placeholder = 'Ej. 3 a\u00f1os, 6 meses, 15 d\u00edas';
+    return;
+  }
+
+  var partes = fechaInput.value.split('-');
+  var nacimiento = new Date(+partes[0], +partes[1] - 1, +partes[2]);
+  var hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  var a\u00f1os = hoy.getFullYear() - nacimiento.getFullYear();
+  var meses = hoy.getMonth() - nacimiento.getMonth();
+  var d\u00edas = hoy.getDate() - nacimiento.getDate();
+
+  if (d\u00edas < 0) {
+    meses--;
+    var mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+    d\u00edas += mesAnterior.getDate();
+  }
+  if (meses < 0) {
+    a\u00f1os--;
+    meses += 12;
+  }
+
+  var texto = '';
+  if (a\u00f1os > 0) {
+    texto = a\u00f1os + (a\u00f1os === 1 ? ' a\u00f1o' : ' a\u00f1os');
+  } else if (meses > 0) {
+    texto = meses + (meses === 1 ? ' mes' : ' meses');
+  } else {
+    texto = d\u00edas + (d\u00edas === 1 ? ' d\u00eda' : ' d\u00edas');
+  }
+
+  edadInput.value = texto;
+  edadInput.readOnly = true;
+}
+</script>
+</body></html>

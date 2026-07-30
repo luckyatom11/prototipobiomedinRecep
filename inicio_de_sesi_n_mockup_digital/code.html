@@ -1,0 +1,100 @@
+<!DOCTYPE html><html lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Login - BioMedin Laboratorios</title>
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              primary: '#1d428a', // Dark blue from BioMedin logo
+              secondary: '#40c1ac', // Teal/Cyan from BioMedin logo
+              surface: '#f8f9fa',
+              border: '#d9dadb',
+              text: '#1a1c1e'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          borderRadius: {
+            'custom': '4px',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layouts">
+    body {
+      background-color: #f3f4f5;
+      font-family: 'Inter', sans-serif;
+    }
+    .login-gradient-border {
+      border-top: 4px solid #40c1ac;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<!-- BEGIN: LoginContainer -->
+<main class="w-full max-w-lg" data-purpose="login-container">
+<!-- BEGIN: LoginCard -->
+<div class="bg-white rounded-custom shadow-2xl border border-brand-border overflow-hidden login-gradient-border">
+<!-- Header Area (Logo & Help) -->
+<div class="flex justify-between items-center p-6 border-b border-gray-100">
+<!-- Logo Section -->
+
+<!-- Help Icon -->
+<button class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-brand-secondary hover:border-brand-secondary transition-colors" title="Ayuda">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<circle cx="12" cy="12" fill="none" r="10" stroke="currentColor" stroke-width="2"></circle>
+<line stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="12" x2="12.01" y1="17" y2="17"></line>
+</svg>
+</button>
+</div>
+<!-- Main Login Form -->
+<div class="p-8 md:p-12">
+<div class="text-center mb-10"><div class="flex justify-center mb-6"><img alt="BioMedin Logo" class="h-16 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeyOnhncgfDLf0pu7Z0y0pZrMG5VeMVNZDDv3pu6a8NzXRVpGRDV2bOpGSLiA0N2_h9xL-To2sZpaKt0mo3V_mAa8hA-talSdyNFYNZsQqhd14nWLYsCmDkxvEmxfBnlqxKK8oyY3G3H5z6jW9lL_GQCCEGTmtZnfCTqcYjOJT2UHuut1VJEonae9SM8cj6O1qXBvW9MDnU492a4oh0IJrz6MxlGlT8hn8uKpstsUhc5kPzQ72A3GiIuea89LdBTgrTw"></div>
+<h1 class="text-3xl font-bold text-brand-primary mb-2">Bienvenido</h1>
+<p class="text-gray-500">Ingrese sus credenciales de acceso</p>
+</div>
+<form action="#" class="space-y-6" method="POST">
+<!-- Username Field -->
+<div data-purpose="form-group-user">
+<label class="block text-sm font-semibold text-gray-700 mb-1" for="usuario">Usuario:</label>
+<input class="w-full px-4 py-3 border border-gray-300 rounded-custom focus:ring-2 focus:ring-brand-secondary focus:border-brand-secondary outline-none transition-all" id="usuario" name="usuario" placeholder="ej. amartinez" required="" type="text">
+</div>
+<!-- Password Field -->
+<div data-purpose="form-group-password">
+<label class="block text-sm font-semibold text-gray-700 mb-1" for="password">Contraseña:</label>
+<input class="w-full px-4 py-3 border border-gray-300 rounded-custom focus:ring-2 focus:ring-brand-secondary focus:border-brand-secondary outline-none transition-all" id="password" name="password" placeholder="••••••••" required="" type="password">
+</div>
+<!-- Submit Button -->
+<div class="pt-4" data-purpose="form-actions">
+<button class="w-full text-white font-bold py-3 px-6 rounded-custom shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group bg-[#40c1ac] hover:bg-[#34a08e]" type="submit">
+<span class="">Iniciar Sesión</span>
+<svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</form>
+<!-- Footer Links -->
+<div class="mt-8 text-center">
+<a class="text-sm text-brand-primary font-medium hover:text-brand-secondary transition-colors" href="#">¿Olvidó su contraseña?</a>
+</div>
+</div>
+</div>
+<!-- END: LoginCard -->
+<!-- System Footer Info -->
+<div class="mt-8 text-center text-xs text-gray-400">
+      © 2026 BioMedin Laboratorios. Confianza a toda prueba.
+    </div>
+</main>
+<!-- END: LoginContainer -->
+
+
+</body></html>

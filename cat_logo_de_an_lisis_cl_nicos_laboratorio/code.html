@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Catálogo de Análisis Clínicos - BioMedin Laboratorios</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            // Colors derived from BioMedin logo https://lh3.googleusercontent.com/aida-public/AB6AXuAWaUonmWd3KHFUPZBmkqcB6LB-tU9F3TNX6B8jYZ4Lu82D1U23noxU9CUGjHYvhVgqj0Iyd-Vm8Z9ooZ_BAKk_U25pTqyaLBZPWoht1x4DEOKODrE_K0os9cU2y2Z58H2i5-dBDtB9RSc9G8F6vv2dMwwWrXPhfh3NYdSwN9h8YmwJitYWBvbc_acug3Bd22Kpph9grrhWO3EvqBPFdGzE4-Ac06wVmwbECt10ZcS1jEYIAbHVgPdPCQjyqLln4jIyUA
+            primary: '#1d4189', // Dark Blue from "Bio"
+            secondary: '#36c5b9', // Teal/Cyan from "Medin"
+            surface: '#f4f7f9',
+            'surface-container': '#ffffff',
+            'surface-dim': '#e2e8f0',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scrollbar">
+    /* Custom scrollbar for a cleaner medical UI look */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1d4189;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #15326a;
+    }
+  </style>
+</head>
+<body class="bg-surface font-sans text-slate-800 min-h-screen flex">
+<!-- BEGIN: Sidebar Navigation -->
+<aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0" data-purpose="main-sidebar">
+<div class="p-6">
+<!-- Logo Container -->
+<div class="flex flex-col items-center justify-center gap-1" data-purpose="logo">
+<img alt="BioMedin Laboratorios" class="h-16 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAbcZ0i8jcRsdz3DH8OZA1rTFK7pK6NbEjV4YBw9WC15squlVLcHrq8KyO-VjE7bqvPGnZYZ6YyWJox4_XT8mYqQAo9YYbY7gWu0owxXI-gwCf83Mbg3vgpbDSFqG2h4xEeJIjtShdoOsPeIj6FQmaWeIUGDNBympEO3vH0J_-97BUDVahNYn4SZDJqH8S2DC7F-h3maBlK9X3aUasht5S53gcvJgBLz1COAniUaKWHMS1d8lhnA5dXpdO2-t_mwQH8Q">
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 px-4 space-y-2 mt-4" data-purpose="nav-menu">
+<a class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors group" href="#">
+<svg class="h-5 w-5 text-gray-400 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="font-medium">Inicio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors group" href="#">
+<svg class="h-5 w-5 text-gray-400 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="font-medium">Añadir Paciente</span>
+</a>
+<!-- Active State for Analysis Catalog -->
+<a class="flex items-center gap-3 px-4 py-3 text-white rounded-lg font-semibold transition-colors bg-secondary" data-purpose="active-nav" href="#"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg><span class="font-medium">Análisis Clínicos</span></a>
+</nav>
+<!-- Logout Button -->
+<div class="p-4 border-t border-gray-100">
+<button class="flex items-center gap-3 px-4 py-3 w-full text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group">
+<svg class="h-5 w-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="font-medium text-sm">Cerrar sesión</span>
+</button>
+</div>
+</aside>
+<!-- END: Sidebar Navigation -->
+<!-- BEGIN: Main Content Area -->
+<main class="flex-1 flex flex-col min-h-0 bg-surface">
+<!-- BEGIN: Header -->
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10" data-purpose="main-header">
+<div class="flex gap-12">
+<!-- Branch Selector Info -->
+<div>
+<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Sucursal</p>
+<div class="flex items-center gap-1">
+<span class="text-sm font-semibold text-gray-700">Sucursal Central - CDMX</span>
+<svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" fill-rule="evenodd"></path>
+</svg>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<!-- User Profile Info -->
+<div class="text-right">
+<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nombre Recepcionista</p>
+<p class="text-sm font-semibold text-gray-700">Ana Karen Martínez</p>
+</div>
+<!-- Action Icons -->
+<div class="flex items-center gap-4 pl-6 border-l border-gray-200">
+<button class="relative text-gray-400 hover:text-primary transition-colors">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
+</button>
+<button class="h-9 w-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: Header -->
+<!-- BEGIN: Main Page Content -->
+<div class="p-8 flex-1 overflow-y-auto" data-purpose="content-container">
+<div class="max-w-7xl mx-auto">
+<!-- Section Heading -->
+<div class="mb-8 flex items-center gap-3">
+<div class="w-1.5 h-8 bg-secondary rounded-full"></div>
+<h1 class="text-2xl font-bold text-primary tracking-tight">Catálogo de Análisis Clínicos</h1>
+</div>
+<!-- Search and Filter Bar -->
+<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6" data-purpose="table-controls">
+<div class="relative max-w-2xl">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-secondary focus:border-secondary text-sm transition-all outline-none" id="search-input" placeholder="Buscar estudio por nombre..." type="text">
+</div>
+</div>
+<!-- BEGIN: Data Table -->
+<div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden" data-purpose="table-wrapper">
+<table class="w-full text-left border-collapse" id="catalog-table">
+<thead class="border-b border-emerald-100 bg-primary">
+<tr>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-white">Prueba</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-white">Nombre Estudio</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-white">Tipo Muestra</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-center text-white">Días Entrega</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-right text-white">Precio</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-white">Observaciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100">
+<!-- Row 1 -->
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">LABORATORIO</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Glucosa en Ayunas</td>
+<td class="px-6 py-4 text-sm text-gray-500">Suero sanguíneo</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center">
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">1</span>
+</td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$120.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Requiere ayuno de 8-12 horas.</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">MDM</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Biometría Hemática Completa</td>
+<td class="px-6 py-4 text-sm text-gray-500">Sangre total (EDTA)</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center"><span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">3</span></td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$250.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Sin preparación especial.</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">ORTHIN</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Examen General de Orina</td>
+<td class="px-6 py-4 text-sm text-gray-500">Orina (Muestra fresca)</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center"><span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">2</span></td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$80.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Primera orina de la mañana preferente.</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">LABORATORIO</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Perfil Lipídico</td>
+<td class="px-6 py-4 text-sm text-gray-500">Suero sanguíneo</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center">
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">2</span>
+</td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$380.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Ayuno estricto de 12 horas.</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">LABORATORIO</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Química Sanguínea (6 Elementos)</td>
+<td class="px-6 py-4 text-sm text-gray-500">Suero sanguíneo</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center">
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">1</span>
+</td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$450.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Incluye Glucosa, Urea, Creatinina, Ác. Úrico, Colesterol y Triglicéridos.</td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">MDM</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Prueba de Embarazo (HCG)</td>
+<td class="px-6 py-4 text-sm text-gray-500">Suero o Sangre Total</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center">
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">1</span>
+</td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$180.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Resultado el mismo día.</td>
+</tr>
+</tbody>
+</table>
+<!-- Table Pagination Footer -->
+<div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+<span class="text-xs text-gray-500 font-medium">Mostrando 1 a 6 de 124 estudios</span>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded hover:bg-secondary/20 text-primary transition-colors">
+<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" fill-rule="evenodd"></path>
+</svg>
+</button>
+<div class="flex items-center gap-1">
+<input class="w-8 h-8 text-center text-xs font-bold border border-gray-200 rounded-md focus:ring-secondary focus:border-secondary outline-none text-primary" type="text" value="1">
+<span class="text-xs text-gray-400 font-medium px-2">/ 21</span>
+</div>
+<button class="p-1 rounded hover:bg-secondary/20 text-primary transition-colors">
+<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" fill-rule="evenodd"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+<!-- END: Data Table -->
+</div>
+</div>
+<!-- END: Main Page Content -->
+</main>
+<!-- END: Main Content Area -->
+<script data-purpose="interaction-logic">
+    // Simple search filter logic for demonstration
+    const searchInput = document.getElementById('search-input');
+    const tableRows = document.querySelectorAll('#catalog-table tbody tr');
+
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      
+      tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(term)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  </script>
+
+
+</body></html>

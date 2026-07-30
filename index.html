@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioMedin - Módulo Recepción (Prototipo)</title>
+
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Merged tailwind config (all colors from all screens) -->
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: { primary: '#1d428a', secondary: '#40c1ac', surface: '#f8f9fa', border: '#d9dadb', text: '#1a1c1e' },
+        primary: '#1d4189',
+        secondary: '#36c5b9',
+        surface: '#f4f7f9',
+        'surface-container': '#ffffff',
+        'surface-dim': '#e2e8f0',
+        'biomedin-blue': '#1a3a8a',
+        'biomedin-teal': '#2dd4bf',
+        'biomedin-teal-dark': '#0d9488',
+        'biomedin-teal-light': '#f0fdfa',
+      },
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      borderRadius: { 'custom': '4px' }
+    }
+  }
+}
+</script>
+
+<style>
+/* ========== Screen toggling ========== */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ========== From Login ========== */
+#screen-login { background-color: #f3f4f5; font-family: 'Inter', sans-serif; }
+#screen-login .login-gradient-border { border-top: 4px solid #40c1ac; }
+
+/* ========== From Dashboard ========== */
+#screen-dashboard { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+#screen-dashboard .biomedin-blue { color: #1e4b9b; }
+#screen-dashboard .bg-biomedin-blue { background-color: #1e4b9b; }
+#screen-dashboard .border-biomedin-blue { border-color: #1e4b9b; }
+#screen-dashboard .biomedin-teal { color: #4dc2c1; }
+#screen-dashboard .bg-biomedin-teal { background-color: #4dc2c1; }
+#screen-dashboard .border-biomedin-teal { border-color: #4dc2c1; }
+#screen-dashboard .nav-active-bg { background-color: rgba(30, 75, 155, 0.08); }
+#screen-dashboard .nav-active-text { color: #1e4b9b; }
+#screen-dashboard .nav-active-border { border-color: rgba(30, 75, 155, 0.2); }
+#screen-dashboard .main-wrapper { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+#screen-dashboard .content-area { display: flex; flex-direction: column; }
+
+/* ========== From Registro ========== */
+#screen-registro { font-family: 'Inter', sans-serif; }
+#screen-registro .active-nav-item { background-color: #1a3a8a; color: white; }
+
+/* ========== From Analisis Clinicos ========== */
+#screen-analisis { font-family: 'Inter', sans-serif; }
+#screen-analisis ::-webkit-scrollbar { width: 6px; }
+#screen-analisis ::-webkit-scrollbar-track { background: #f1f1f1; }
+#screen-analisis ::-webkit-scrollbar-thumb { background: #1d4189; border-radius: 3px; }
+#screen-analisis ::-webkit-scrollbar-thumb:hover { background: #15326a; }
+
+/* ========== Sidebar colapsable (todos los tamaños) ========== */
+.hamburger {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; cursor: pointer; background: none; border: none;
+  color: #1e4b9b; border-radius: 8px; transition: background-color 0.2s;
+}
+.hamburger:hover { background-color: rgba(30, 75, 155, 0.08); }
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 40;
+}
+.sidebar-overlay.open { display: block; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+#screen-dashboard .main-wrapper { grid-template-columns: 1fr; }
+#screen-dashboard .main-wrapper > aside,
+#screen-registro > div > aside,
+#screen-analisis > div > aside {
+  position: fixed; top: 0; left: -280px; width: 260px;
+  height: 100vh; z-index: 50;
+  transition: left 0.3s ease;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+}
+#screen-dashboard .main-wrapper > aside.open,
+#screen-registro > div > aside.open,
+#screen-analisis > div > aside.open { left: 0; }
+@media (max-width: 1023px) {
+  #screen-dashboard main { padding: 1rem !important; }
+  #screen-registro main { padding: 1rem !important; }
+  #screen-analisis .p-8 { padding: 1rem !important; }
+  #screen-registro .max-w-4xl { padding-left: 0; padding-right: 0; }
+  #screen-registro .grid-cols-1.md\:grid-cols-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- SCREEN 1: LOGIN (exact original content)                    -->
+<!-- ============================================================ -->
+<div id="screen-login" class="screen active">
+<div class="min-h-screen flex flex-col items-center justify-center p-4">
+<main class="w-full max-w-lg">
+<div class="bg-white rounded-custom shadow-2xl border border-brand-border overflow-hidden login-gradient-border">
+<div class="flex justify-between items-center p-6 border-b border-gray-100">
+<button class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-brand-secondary hover:border-brand-secondary transition-colors" title="Ayuda">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><circle cx="12" cy="12" fill="none" r="10" stroke="currentColor" stroke-width="2"></circle><line stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="12" x2="12.01" y1="17" y2="17"></line></svg>
+</button>
+</div>
+<div class="p-8 md:p-12">
+<div class="text-center mb-10"><div class="flex justify-center mb-6"><img alt="BioMedin Logo" class="h-16 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeyOnhncgfDLf0pu7Z0y0pZrMG5VeMVNZDDv3pu6a8NzXRVpGRDV2bOpGSLiA0N2_h9xL-To2sZpaKt0mo3V_mAa8hA-talSdyNFYNZsQqhd14nWLYsCmDkxvEmxfBnlqxKK8oyY3G3H5z6jW9lL_GQCCEGTmtZnfCTqcYjOJT2UHuut1VJEonae9SM8cj6O1qXBvW9MDnU492a4oh0IJrz6MxlGlT8hn8uKpstsUhc5kPzQ72A3GiIuea89LdBTgrTw"></div>
+<h1 class="text-3xl font-bold text-brand-primary mb-2">Bienvenido</h1>
+<p class="text-gray-500">Ingrese sus credenciales de acceso</p>
+</div>
+<form onsubmit="event.preventDefault(); showScreen('dashboard');" class="space-y-6">
+<div>
+<label class="block text-sm font-semibold text-gray-700 mb-1" for="usuario">Usuario:</label>
+<input class="w-full px-4 py-3 border border-gray-300 rounded-custom focus:ring-2 focus:ring-brand-secondary focus:border-brand-secondary outline-none transition-all" id="usuario" name="usuario" placeholder="ej. amartinez" required="" type="text" value="admin">
+</div>
+<div>
+<label class="block text-sm font-semibold text-gray-700 mb-1" for="password">Contraseña:</label>
+<input class="w-full px-4 py-3 border border-gray-300 rounded-custom focus:ring-2 focus:ring-brand-secondary focus:border-brand-secondary outline-none transition-all" id="password" name="password" placeholder="••••••••" required="" type="password" value="1234">
+</div>
+<div class="pt-4">
+<button class="w-full text-white font-bold py-3 px-6 rounded-custom shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group bg-[#40c1ac] hover:bg-[#34a08e]" type="submit">
+<span>Iniciar Sesión</span>
+<svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</form>
+<div class="mt-8 text-center">
+<a class="text-sm text-brand-primary font-medium hover:text-brand-secondary transition-colors" href="#">¿Olvidó su contraseña?</a>
+</div>
+</div>
+</div>
+<div class="mt-8 text-center text-xs text-gray-400">&copy; 2026 BioMedin Laboratorios. Confianza a toda prueba.</div>
+</main>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 2: DASHBOARD (exact original content)                -->
+<!-- ============================================================ -->
+<div id="screen-dashboard" class="screen">
+<div class="sidebar-overlay" onclick="toggleMenu('dashboard')"></div>
+<div class="main-wrapper">
+<aside class="sidebar bg-white border-r border-slate-200 flex flex-col h-full sticky top-0">
+<div class="p-6 border-b border-slate-100 flex items-center justify-center">
+<img alt="BioMedin Logo" class="h-16 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWI3BsYhqsW1Jz2iy_bymBO1Lde0sqQnutY0U_V3ZU0iPvU9qFvlvDp59mRxT_dDWV4Ko4hCu7K6sg2w8sJhRIpJuPOZEmjsdeas_yLyfUR8XOlBMNSgXMYZzlm6ocaswIp_faJb-ay1_vNz6umRPOIDjzigZ0Pu3gNp2KhhsO1_l1_oA4IWBSDSui3d-4C8I2mc0H-SoKBUitXTky6PlIQJJDPJq-CMeFtPIO06YvdTWEnm-v0IQS-_bFVohSctnHzw">
+</div>
+<nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 text-white rounded-lg font-semibold transition-colors border shadow-sm" href="#" style="background-color: rgb(0, 150, 136); border-color: rgb(0, 150, 136);">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>Inicio</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-biomedin-teal rounded-lg font-medium transition-colors" href="#" onclick="event.preventDefault(); showScreen('registro');">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+Añadir Paciente</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-biomedin-teal rounded-lg font-medium transition-colors" href="#" onclick="event.preventDefault(); showScreen('analisis');">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>Análisis Clínicos</a>
+</nav>
+<div class="p-4 border-t border-slate-100">
+<button class="flex items-center gap-3 w-full p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors" onclick="showScreen('login')">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</aside>
+<div class="content-area">
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10">
+<div class="flex items-center gap-8">
+<button class="hamburger" onclick="toggleMenu('dashboard')" aria-label="Men\u00fa">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></svg>
+</button>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Sucursal</span>
+<span class="text-sm font-semibold text-slate-700">Sucursal Central - CDMX</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col text-right">
+<span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Recepcionista</span>
+<span class="text-sm font-semibold text-slate-700">Ana Karen Martínez</span>
+</div>
+<div class="flex items-center gap-4 border-l pl-6">
+<button class="relative p-2 text-slate-400 hover:text-biomedin-teal transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="absolute top-2 right-2 w-2 h-2 bg-biomedin-teal rounded-full border-2 border-white"></span>
+</button>
+<div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+<svg class="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+</div>
+</div>
+</div>
+</header>
+              <main class="p-8 flex-1">
+                <section class="mb-10 max-w-3xl mx-auto">
+                  <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <svg class="h-6 w-6 text-slate-400 group-focus-within:text-biomedin-teal transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                    </div>
+                    <input id="search-dashboard" class="w-full pl-12 pr-4 py-4 rounded-full border border-slate-300 focus:border-biomedin-teal focus:ring-2 focus:ring-secondary-container transition-all text-lg shadow-sm outline-none" placeholder="Buscador de pacientes" type="text">
+                  </div>
+                </section>
+                <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+<div class="table-wrap">
+<table class="w-full text-left border-collapse">
+<thead class="uppercase text-xs font-bold border-b border-slate-200 bg-biomedin-blue text-white">
+                      <tr>
+                        <th class="px-6 py-4">Fecha</th>
+                        <th class="px-6 py-4">Nombre Cliente</th>
+                        <th class="px-6 py-4">Estudio</th>
+                        <th class="px-6 py-4">Doctor</th>
+                        <th class="px-6 py-4 text-center">Opciones</th>
+                        <th class="px-6 py-4">Estado</th>
+                        <th class="px-6 py-4">Saldo</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                      <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">27-09-26</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-biomedin-blue">Martin Solis Angulo</td>
+                        <td class="px-6 py-4 text-sm">Urocultivo</td>
+                        <td class="px-6 py-4 text-sm text-slate-500">A quien Corresponda</td>
+                        <td class="px-6 py-4"><div class="flex justify-center items-center gap-3">
+                          <button class="p-1.5 text-slate-400 hover:text-biomedin-teal hover:bg-teal-50 rounded transition-all btn-impresora" title="Imprimir" onclick="marcarImpreso(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-400 hover:text-biomedin-teal hover:bg-teal-50 rounded transition-all btn-descargar" title="Descargar" onclick="marcarImpreso(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all marcar-pagado" title="Marcar como pagado" onclick="marcarPagado(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                        </div></td>
+                        <td class="px-6 py-4 estado-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Impreso</span></td>
+                        <td class="px-6 py-4 saldo-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Pagado</span></td>
+                      </tr>
+                      <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">27-09-26</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-biomedin-blue">Martin Solis Angulo</td>
+                        <td class="px-6 py-4 text-sm">Química Sanguínea</td>
+                        <td class="px-6 py-4 text-sm text-slate-500">A quien Corresponda</td>
+                        <td class="px-6 py-4"><div class="flex justify-center items-center gap-3">
+                          <button class="p-1.5 text-slate-300 cursor-not-allowed btn-impresora" title="Imprimir" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-300 cursor-not-allowed btn-descargar" title="Descargar" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all marcar-pagado" title="Marcar como pagado" onclick="marcarPagado(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                        </div></td>
+                        <td class="px-6 py-4 estado-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pendiente</span></td>
+                        <td class="px-6 py-4 saldo-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">$450.00</span></td>
+                      </tr>
+                      <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">28-09-26</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-biomedin-blue">Elena Rodriguez Ruiz</td>
+                        <td class="px-6 py-4 text-sm">Biometría Hemática</td>
+                        <td class="px-6 py-4 text-sm text-slate-500">Dr. Carlos Méndez</td>
+                        <td class="px-6 py-4"><div class="flex justify-center items-center gap-3">
+                          <button class="p-1.5 text-slate-400 hover:text-biomedin-teal hover:bg-teal-50 rounded transition-all btn-impresora" title="Imprimir" onclick="marcarImpreso(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-400 hover:text-biomedin-teal hover:bg-teal-50 rounded transition-all btn-descargar" title="Descargar" onclick="marcarImpreso(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all marcar-pagado" title="Marcar como pagado" onclick="marcarPagado(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                        </div></td>
+                        <td class="px-6 py-4 estado-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">Para imprimir</span></td>
+                        <td class="px-6 py-4 saldo-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Pagado</span></td>
+                      </tr>
+                      <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">28-09-26</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-biomedin-blue">Ricardo Alarcón</td>
+                        <td class="px-6 py-4 text-sm">Examen General de Orina</td>
+                        <td class="px-6 py-4 text-sm text-slate-500">A quien Corresponda</td>
+                        <td class="px-6 py-4"><div class="flex justify-center items-center gap-3">
+                          <button class="p-1.5 text-slate-300 cursor-not-allowed btn-impresora" title="Imprimir" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-300 cursor-not-allowed btn-descargar" title="Descargar" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all marcar-pagado" title="Marcar como pagado" onclick="marcarPagado(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                        </div></td>
+                        <td class="px-6 py-4 estado-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pendiente</span></td>
+                        <td class="px-6 py-4 saldo-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">$80.00</span></td>
+                      </tr>
+                      <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">29-09-26</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-biomedin-blue">Sofía Valenzuela</td>
+                        <td class="px-6 py-4 text-sm">Perfil Lipídico</td>
+                        <td class="px-6 py-4 text-sm text-slate-500">Dra. Laura Ortiz</td>
+                        <td class="px-6 py-4"><div class="flex justify-center items-center gap-3">
+                          <button class="p-1.5 text-slate-300 cursor-not-allowed btn-impresora" title="Imprimir" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-300 cursor-not-allowed btn-descargar" title="Descargar" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                          <button class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all marcar-pagado" title="Marcar como pagado" onclick="marcarPagado(this)"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                        </div></td>
+                        <td class="px-6 py-4 estado-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pendiente</span></td>
+                        <td class="px-6 py-4 saldo-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">$380.00</span></td>
+                      </tr>
+</tbody>
+</table>
+</div>
+<footer class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-center">
+                    <nav class="flex items-center gap-1">
+                      <button class="p-2 text-slate-400 hover:text-biomedin-teal disabled:opacity-30" disabled=""><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                      <button class="p-2 text-slate-400 hover:text-biomedin-teal disabled:opacity-30" disabled=""><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                      <div class="px-4 py-1.5 bg-white border border-slate-200 rounded text-sm font-medium text-slate-600 mx-2">1 / 5</div>
+                      <button class="p-2 text-slate-500 hover:text-biomedin-teal transition-colors"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                      <button class="p-2 text-slate-500 hover:text-biomedin-teal transition-colors"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+                    </nav>
+                  </footer>
+                </section>
+              </main>
+</div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 3: REGISTRO PACIENTE (exact original content)        -->
+<!-- ============================================================ -->
+<div id="screen-registro" class="screen">
+<div class="sidebar-overlay" onclick="toggleMenu('registro')"></div>
+<div class="bg-gray-50 flex h-screen overflow-hidden">
+<aside class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+<div class="p-4 border-b border-gray-100 flex items-center justify-center">
+<img alt="BioMedin Logo" class="h-16 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuJF0K_Kw8NmOFPCVCDuXzUOeF1F68vcH4ugW3-cTAtHws5UL0MsuDj7I9x1dgIA6lpe96A-7rNDEQug85Jed40L4NSvjpV4FibAtjPvvAie-O53wIjHZ4S39vkWq2XJyecjUYeo5VTwab_P7qE5EovsGkmOzyn9MQh9w4WjVNTuVO-CB4X2ZjL4cQiTTGKjRacz7NkcCkwzuT9LFWgdc6PIZPGEbvhGiYtlny3EPiZn717JfGltkdWjQe37MXotwWsw">
+</div>
+<nav class="flex-1 p-4 space-y-2">
+<a class="flex items-center gap-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors" href="#" onclick="event.preventDefault(); showScreen('dashboard');">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Inicio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white rounded-lg font-semibold transition-colors bg-biomedin-teal" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="font-medium">Añadir Paciente</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors" href="#" onclick="event.preventDefault(); showScreen('analisis');"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg><span>Análisis Clínicos</span></a>
+</nav>
+<div class="p-4 border-t border-gray-100">
+<button class="flex items-center gap-3 w-full p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors" onclick="showScreen('login')">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10">
+<div class="flex items-center gap-8">
+<button class="hamburger" onclick="toggleMenu('registro')" aria-label="Men\u00fa">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></svg>
+</button>
+<div class="flex flex-col">
+<span class="text-xs text-gray-500 uppercase font-semibold">Sucursal</span>
+<span class="text-sm font-medium text-gray-900">Sucursal Central - CDMX</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col text-right">
+<span class="text-xs text-gray-500 uppercase font-semibold">Nombre Recepcionista</span>
+<span class="text-sm font-medium text-gray-900">Ana Karen Martínez</span>
+</div>
+<div class="flex items-center gap-4 border-l pl-6">
+<button class="relative p-2 text-gray-400 hover:text-biomedin-teal transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="absolute top-2 right-2 w-2 h-2 bg-biomedin-teal rounded-full border-2 border-white"></span>
+</button>
+<div class="w-10 h-10 rounded-full bg-biomedin-teal-light flex items-center justify-center overflow-hidden border border-biomedin-teal/20">
+<svg class="w-6 h-6 text-biomedin-teal-dark" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-8">
+<div class="max-w-4xl mx-auto">
+<h1 class="text-3xl font-bold text-gray-900 mb-8">Registro de Paciente</h1>
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+<div class="flex items-center gap-2 mb-6">
+<div class="w-1.5 h-6 bg-biomedin-teal rounded-full"></div>
+<h2 class="text-xl font-bold text-gray-800">Información Personal</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div><label class="block text-sm font-semibold text-gray-700 mb-2">Nombre</label><input class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Ej. Juan Carlos" type="text"></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-2">Apellidos</label><input class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Ej. Pérez García" type="text"></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Nacimiento <span class="text-gray-400 font-normal">(opcional)</span></label><input id="fecha-nacimiento" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" type="date" onchange="calcularEdad()"></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-2">Edad</label><input id="edad" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Ej. 3 años, 6 meses, 15 días" type="text"><input id="edad-anios" type="hidden" value=""></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-2">Sexo</label><select class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal"><option value="">Seleccionar...</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option></select></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-2">Número telefónico <span class="text-gray-400 font-normal">(opcional)</span></label><input class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="55 1234 5678" type="tel"></div>
+<div class="md:col-span-2"><label class="block text-sm font-semibold text-gray-700 mb-2">Médico que ordena</label><input class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Ej. Dr. Carlos Méndez" type="text"></div>
+</div>
+</section>
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+<div class="flex items-center gap-2 mb-6">
+<div class="w-1.5 h-6 bg-biomedin-teal rounded-full"></div>
+<h2 class="text-xl font-bold text-gray-800">Análisis Clínicos</h2>
+</div>
+<div class="mb-8">
+<div class="relative mb-4">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-biomedin-teal focus:border-biomedin-teal sm:text-sm" id="search-registro" placeholder="Buscar análisis..." type="text">
+</div>
+<div class="border border-gray-100 rounded-lg divide-y divide-gray-100" id="search-results-registro"></div>
+</div>
+<div class="overflow-hidden border border-gray-200 rounded-lg mb-8">
+<div class="table-wrap">
+<table class="min-w-full divide-y divide-gray-200">
+<thead class="bg-biomedin-blue">
+<tr>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Análisis Clínico</th>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Precio</th>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Acción</th>
+</tr>
+</thead>
+<tbody class="bg-white divide-y divide-gray-200">
+</tbody>
+</table>
+</div>
+</div>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 border-t border-gray-100 pt-6">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-4">
+<label class="text-sm font-semibold text-gray-700">Tipo de pago:</label>
+<select class="border-gray-300 rounded-lg text-sm focus:ring-biomedin-teal focus:border-biomedin-teal min-w-[160px]">
+<option>T. Crédito</option>
+<option>Efectivo</option>
+<option>T. Débito</option>
+<option>Transferencia</option>
+</select>
+</div>
+<span class="text-xs text-gray-400 italic ml-1">Pago en una sola exhibición. Si requiere abonos, usa la sección de abonos.</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm font-semibold text-gray-700 uppercase">Total:</span>
+<div class="bg-biomedin-teal-light border-2 border-biomedin-teal/20 rounded-lg px-6 py-2">
+<span class="text-2xl font-bold text-biomedin-blue">$0</span>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+<div class="flex items-center gap-2 mb-6">
+<div class="w-1.5 h-6 bg-biomedin-teal rounded-full"></div>
+<h2 class="text-xl font-bold text-gray-800">Abonos</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<div>
+<label class="block text-sm font-semibold text-gray-700 mb-2">Monto del abono</label>
+<input id="abono-monto" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="$0.00" type="number" min="0" step="0.01">
+</div>
+<div>
+<label class="block text-sm font-semibold text-gray-700 mb-2">Forma de pago</label>
+<select id="abono-pago" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal">
+<option>T. Crédito</option>
+<option>Efectivo</option>
+<option>T. Débito</option>
+<option>Transferencia</option>
+</select>
+</div>
+<div class="flex items-end">
+<button class="w-full px-8 py-2.5 bg-biomedin-teal text-white rounded-lg font-bold hover:bg-biomedin-teal-dark transition-all focus:ring-4 focus:ring-biomedin-teal/20" onclick="agregarAbono()">Agregar Abono</button>
+</div>
+</div>
+<div class="overflow-hidden border border-gray-200 rounded-lg mb-4">
+<div class="table-wrap">
+<table class="min-w-full divide-y divide-gray-200" id="abonos-table">
+<thead class="bg-biomedin-blue">
+<tr>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">#</th>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Monto</th>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Forma de pago</th>
+<th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Acción</th>
+</tr>
+</thead>
+<tbody class="bg-white divide-y divide-gray-200"></tbody>
+</table>
+</div>
+</div>
+<div class="flex flex-col md:flex-row md:items-center justify-end gap-6 border-t border-gray-100 pt-6">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-gray-700">Total carrito:</span>
+<span class="text-sm font-bold text-biomedin-blue" id="total-carrito">$0</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-gray-700">Total abonado:</span>
+<span class="text-sm font-bold text-biomedin-teal-dark" id="total-abonado">$0</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-gray-700">Saldo pendiente:</span>
+<div class="bg-biomedin-teal-light border-2 border-biomedin-teal/20 rounded-lg px-6 py-2">
+<span class="text-2xl font-bold text-biomedin-blue" id="saldo-pendiente">$0</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-12">
+<label class="block text-sm font-semibold text-gray-700 mb-3">Observaciones</label>
+<textarea class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-biomedin-teal focus:border-biomedin-teal" placeholder="Notas adicionales sobre la toma de muestra o condiciones del paciente..." rows="4"></textarea>
+</section>
+<div class="flex justify-end gap-4 mb-12">
+<button class="px-8 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-all focus:ring-2 focus:ring-gray-200" onclick="showScreen('dashboard')">Cancelar</button>
+<button class="px-10 py-3 bg-biomedin-blue text-white rounded-lg font-bold shadow-md shadow-blue-900/20 hover:bg-biomedin-blue/90 transition-all focus:ring-4 focus:ring-biomedin-blue/10" onclick="guardarOrden()">Guardar</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 4: ANALISIS CLINICOS (exact original content)       -->
+<!-- ============================================================ -->
+<div id="screen-analisis" class="screen">
+<div class="sidebar-overlay" onclick="toggleMenu('analisis')"></div>
+<div class="bg-surface font-sans text-slate-800 min-h-screen flex">
+<aside class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0">
+<div class="p-6">
+<div class="flex flex-col items-center justify-center gap-1">
+<img alt="BioMedin Laboratorios" class="h-16 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAbcZ0i8jcRsdz3DH8OZA1rTFK7pK6NbEjV4YBw9WC15squlVLcHrq8KyO-VjE7bqvPGnZYZ6YyWJox4_XT8mYqQAo9YYbY7gWu0owxXI-gwCf83Mbg3vgpbDSFqG2h4xEeJIjtShdoOsPeIj6FQmaWeIUGDNBympEO3vH0J_-97BUDVahNYn4SZDJqH8S2DC7F-h3maBlK9X3aUasht5S53gcvJgBLz1COAniUaKWHMS1d8lhnA5dXpdO2-t_mwQH8Q">
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors group" href="#" onclick="event.preventDefault(); showScreen('dashboard');">
+<svg class="h-5 w-5 text-gray-400 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="font-medium">Inicio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors group" href="#" onclick="event.preventDefault(); showScreen('registro');">
+<svg class="h-5 w-5 text-gray-400 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="font-medium">Añadir Paciente</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white rounded-lg font-semibold transition-colors bg-secondary" href="#"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg><span class="font-medium">Análisis Clínicos</span></a>
+</nav>
+<div class="p-4 border-t border-gray-100">
+<button class="flex items-center gap-3 w-full p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors" onclick="showScreen('login')">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-h-0 bg-surface">
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10">
+<div class="flex gap-12">
+<button class="hamburger" onclick="toggleMenu('analisis')" aria-label="Men\u00fa">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></svg>
+</button>
+<div>
+<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Sucursal</p>
+<div class="flex items-center gap-1">
+<span class="text-sm font-semibold text-gray-700">Sucursal Central - CDMX</span>
+<svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" fill-rule="evenodd"></path></svg>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="text-right">
+<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nombre Recepcionista</p>
+<p class="text-sm font-semibold text-gray-700">Ana Karen Martínez</p>
+</div>
+<div class="flex items-center gap-4 pl-6 border-l border-gray-200">
+<button class="relative text-gray-400 hover:text-primary transition-colors">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
+</button>
+<button class="h-9 w-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+</header>
+<div class="p-8 flex-1 overflow-y-auto">
+<div class="max-w-7xl mx-auto">
+<div class="mb-8 flex items-center gap-3">
+<div class="w-1.5 h-8 bg-secondary rounded-full"></div>
+<h1 class="text-2xl font-bold text-primary tracking-tight">Catálogo de Análisis Clínicos</h1>
+</div>
+<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+<div class="relative max-w-2xl">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-secondary focus:border-secondary text-sm transition-all outline-none" id="search-input" placeholder="Buscar estudio por nombre..." type="text">
+</div>
+</div>
+<div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+<div class="table-wrap">
+<table class="w-full text-left border-collapse" id="catalog-table">
+<thead class="border-b border-emerald-100 bg-primary">
+<tr>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-white">Prueba</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-white">Nombre Estudio</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-white">Tipo Muestra</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-center text-white">Días Entrega</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-right text-white">Precio</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-white">Observaciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100">
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">LABORATORIO</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Glucosa en Ayunas</td>
+<td class="px-6 py-4 text-sm text-gray-500">Suero sanguíneo</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center"><span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">1</span></td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$120.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Requiere ayuno de 8-12 horas.</td>
+</tr>
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">MDM</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Biometría Hemática Completa</td>
+<td class="px-6 py-4 text-sm text-gray-500">Sangre total (EDTA)</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center"><span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">3</span></td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$250.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Sin preparación especial.</td>
+</tr>
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">ORTHIN</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Examen General de Orina</td>
+<td class="px-6 py-4 text-sm text-gray-500">Orina (Muestra fresca)</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center"><span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">2</span></td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$80.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Primera orina de la mañana preferente.</td>
+</tr>
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">LABORATORIO</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Perfil Lipídico</td>
+<td class="px-6 py-4 text-sm text-gray-500">Suero sanguíneo</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center"><span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">2</span></td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$380.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Ayuno estricto de 12 horas.</td>
+</tr>
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">LABORATORIO</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Química Sanguínea (6 Elementos)</td>
+<td class="px-6 py-4 text-sm text-gray-500">Suero sanguíneo</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center"><span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">1</span></td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$450.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Incluye Glucosa, Urea, Creatinina, Ác. Úrico, Colesterol y Triglicéridos.</td>
+</tr>
+<tr class="hover:bg-secondary/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-primary">MDM</td>
+<td class="px-6 py-4 text-sm font-medium text-gray-700">Prueba de Embarazo (HCG)</td>
+<td class="px-6 py-4 text-sm text-gray-500">Suero o Sangre Total</td>
+<td class="px-6 py-4 text-sm text-gray-600 text-center"><span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-xs font-bold">1</span></td>
+<td class="px-6 py-4 text-sm font-bold text-primary text-right">$180.00</td>
+<td class="px-6 py-4 text-sm text-gray-400 italic">Resultado el mismo día.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+<span class="text-xs text-gray-500 font-medium">Mostrando 1 a 6 de 124 estudios</span>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded hover:bg-secondary/20 text-primary transition-colors">
+<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" fill-rule="evenodd"></path></svg>
+</button>
+<div class="flex items-center gap-1">
+<input class="w-8 h-8 text-center text-xs font-bold border border-gray-200 rounded-md focus:ring-secondary focus:border-secondary outline-none text-primary" type="text" value="1">
+<span class="text-xs text-gray-400 font-medium px-2">/ 21</span>
+</div>
+<button class="p-1 rounded hover:bg-secondary/20 text-primary transition-colors">
+<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" fill-rule="evenodd"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+<script>
+// ========== Screen navigation ==========
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + screenId).classList.add('active');
+  document.querySelectorAll('.sidebar.open, .sidebar-overlay.open').forEach(function(el) { el.classList.remove('open'); });
+}
+
+function toggleMenu(screenId) {
+  var screen = document.getElementById('screen-' + screenId);
+  if (!screen) return;
+  var aside = screen.querySelector('.sidebar');
+  var overlay = screen.querySelector('.sidebar-overlay');
+  if (aside) {
+    aside.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('open');
+  }
+}
+
+function calcularEdad() {
+  var fechaInput = document.getElementById('fecha-nacimiento');
+  var edadInput = document.getElementById('edad');
+  if (!fechaInput || !edadInput) return;
+
+  if (!fechaInput.value) {
+    edadInput.readOnly = false;
+    edadInput.value = '';
+    edadInput.placeholder = 'Ej. 3 a\u00f1os, 6 meses, 15 d\u00edas';
+    return;
+  }
+
+  var partes = fechaInput.value.split('-');
+  var nacimiento = new Date(+partes[0], +partes[1] - 1, +partes[2]);
+  var hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  var a\u00f1os = hoy.getFullYear() - nacimiento.getFullYear();
+  var meses = hoy.getMonth() - nacimiento.getMonth();
+  var d\u00edas = hoy.getDate() - nacimiento.getDate();
+
+  if (d\u00edas < 0) {
+    meses--;
+    var mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+    d\u00edas += mesAnterior.getDate();
+  }
+  if (meses < 0) {
+    a\u00f1os--;
+    meses += 12;
+  }
+
+  var texto = '';
+  if (a\u00f1os > 0) {
+    texto = a\u00f1os + (a\u00f1os === 1 ? ' a\u00f1o' : ' a\u00f1os');
+  } else if (meses > 0) {
+    texto = meses + (meses === 1 ? ' mes' : ' meses');
+  } else {
+    texto = d\u00edas + (d\u00edas === 1 ? ' d\u00eda' : ' d\u00edas');
+  }
+
+  edadInput.value = texto;
+  edadInput.readOnly = true;
+}
+
+// ========== Catalog data (shared between search tools) ==========
+var catalogoAnalisis = [
+  { nombre: 'Glucosa en Ayunas', tipo: 'Suero sanguíneo', dias: 1, precio: 120.00, obs: 'Requiere ayuno de 8-12 horas.' },
+  { nombre: 'Biometría Hemática Completa', tipo: 'Sangre total (EDTA)', dias: 3, precio: 250.00, obs: 'Sin preparación especial.' },
+  { nombre: 'Examen General de Orina', tipo: 'Orina (Muestra fresca)', dias: 2, precio: 80.00, obs: 'Primera orina de la mañana preferente.' },
+  { nombre: 'Perfil Lipídico', tipo: 'Suero sanguíneo', dias: 2, precio: 380.00, obs: 'Ayuno estricto de 12 horas.' },
+  { nombre: 'Química Sanguínea (6 Elementos)', tipo: 'Suero sanguíneo', dias: 1, precio: 450.00, obs: 'Incluye Glucosa, Urea, Creatinina, Ác. Úrico, Colesterol y Triglicéridos.' },
+  { nombre: 'Prueba de Embarazo (HCG)', tipo: 'Suero o Sangre Total', dias: 1, precio: 180.00, obs: 'Resultado el mismo día.' },
+  { nombre: 'Coprológico', tipo: 'Heces', dias: 2, precio: 200.00, obs: 'Muestra fresca de 3 días.' },
+  { nombre: 'Urocultivo', tipo: 'Orina', dias: 3, precio: 220.00, obs: 'Requiere frasco estéril.' },
+  { nombre: 'Prueba VDRL (Sífilis)', tipo: 'Suero sanguíneo', dias: 2, precio: 190.00, obs: 'No requiere ayuno.' },
+  { nombre: 'Perfil Tiroideo', tipo: 'Suero sanguíneo', dias: 2, precio: 420.00, obs: 'Ayuno de 8 horas.' },
+  { nombre: 'PCR Proteína C Reactiva', tipo: 'Suero sanguíneo', dias: 1, precio: 160.00, obs: 'Sin preparación especial.' },
+  { nombre: 'Electrolitos Séricos', tipo: 'Suero sanguíneo', dias: 1, precio: 140.00, obs: 'Sin preparación especial.' }
+];
+
+// ========== Dashboard search (Buscar pacientes) ==========
+var searchDash = document.getElementById('search-dashboard');
+if (searchDash) {
+  var dashRows = document.querySelectorAll('#screen-dashboard .overflow-hidden table tbody tr');
+  searchDash.addEventListener('input', function(e) {
+    var term = e.target.value.toLowerCase().trim();
+    dashRows.forEach(function(row) {
+      var cols = row.querySelectorAll('td');
+      if (cols.length < 4) return;
+      var nombre = (cols[1]?.textContent || '').toLowerCase();
+      var estudio = (cols[2]?.textContent || '').toLowerCase();
+      row.style.display = (nombre.includes(term) || estudio.includes(term)) ? '' : 'none';
+    });
+  });
+}
+
+// ========== Catalog search (Pantalla Análisis Clínicos) ==========
+var searchInput = document.getElementById('search-input');
+if (searchInput) {
+  var tableRows = document.querySelectorAll('#catalog-table tbody tr');
+  searchInput.addEventListener('input', function(e) {
+    var term = e.target.value.toLowerCase();
+    tableRows.forEach(function(row) {
+      row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  });
+}
+
+// ========== Registro search (Buscar análisis dinámico) ==========
+var searchReg = document.getElementById('search-registro');
+var resultsDiv = document.getElementById('search-results-registro');
+
+if (searchReg && resultsDiv) {
+  searchReg.addEventListener('input', function(e) {
+    var term = e.target.value.toLowerCase().trim();
+    resultsDiv.innerHTML = '';
+    
+    if (term.length === 0) return;
+    
+    var matches = catalogoAnalisis.filter(function(a) {
+      return a.nombre.toLowerCase().includes(term);
+    });
+    
+    matches.forEach(function(analisis) {
+      var item = document.createElement('div');
+      item.className = 'flex items-center justify-between px-4 py-3 hover:bg-biomedin-teal-light cursor-pointer transition-colors';
+      item.innerHTML = '<span class="text-sm font-medium text-gray-700">' + analisis.nombre + '</span><span class="text-sm font-bold text-biomedin-blue">$' + analisis.precio.toFixed(2) + '</span>';
+      
+      item.addEventListener('click', function() {
+        agregarAlCarrito(analisis);
+        resultsDiv.innerHTML = '';
+        searchReg.value = '';
+      });
+      
+      resultsDiv.appendChild(item);
+    });
+  });
+}
+
+function agregarAlCarrito(analisis) {
+  var tbody = document.querySelector('#screen-registro .overflow-hidden table tbody');
+  if (!tbody) return;
+  
+  // Check if already added
+  var existing = tbody.querySelectorAll('tr');
+  for (var i = 0; i < existing.length; i++) {
+    if (existing[i].textContent.includes(analisis.nombre)) return;
+  }
+  
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' + analisis.nombre + '</td>' +
+    '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">$' + analisis.precio.toFixed(2) + '</td>' +
+    '<td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">' +
+    '<button class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg transition-colors" onclick="this.closest(\'tr\').remove(); actualizarTotal();">' +
+    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button></td>';
+  tbody.appendChild(tr);
+  actualizarTotal();
+}
+
+function actualizarTotal() {
+  var totalSpan = document.querySelector('#screen-registro .text-2xl');
+  if (!totalSpan) return;
+  var rows = document.querySelectorAll('#screen-registro .overflow-hidden table tbody tr');
+  var total = 0;
+  rows.forEach(function(row) {
+    var precioText = row.querySelectorAll('td')[1];
+    if (precioText) {
+      var match = precioText.textContent.match(/\d+\.?\d*/);
+      if (match) total += parseFloat(match[0]);
+    }
+  });
+  totalSpan.textContent = '$' + total.toFixed(2);
+  actualizarAbonosUI();
+}
+
+// ========== Abonos ==========
+var abonos = [];
+
+function agregarAbono() {
+  var montoInput = document.getElementById('abono-monto');
+  var pagoSelect = document.getElementById('abono-pago');
+  if (!montoInput || !pagoSelect) return;
+
+  var monto = parseFloat(montoInput.value);
+  if (!monto || monto <= 0) {
+    alert('Ingrese un monto v\u00e1lido mayor a $0');
+    return;
+  }
+
+  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table tbody tr');
+  var totalCarrito = 0;
+  carritoRows.forEach(function(row) {
+    var precioText = row.querySelectorAll('td')[1];
+    if (precioText) {
+      var match = precioText.textContent.match(/\d+\.?\d*/);
+      if (match) totalCarrito += parseFloat(match[0]);
+    }
+  });
+
+  if (totalCarrito === 0) {
+    alert('Agregue an\u00e1lisis al carrito primero');
+    return;
+  }
+
+  var totalAbonado = abonos.reduce(function(sum, a) { return sum + a.monto; }, 0);
+  var saldo = totalCarrito - totalAbonado;
+
+  if (monto > saldo) {
+    alert('El abono no puede exceder el saldo pendiente de $' + saldo.toFixed(2));
+    return;
+  }
+
+  abonos.push({ monto: monto, forma: pagoSelect.value });
+  montoInput.value = '';
+
+  renderizarAbonos();
+  actualizarAbonosUI();
+}
+
+function eliminarAbono(index) {
+  abonos.splice(index, 1);
+  renderizarAbonos();
+  actualizarAbonosUI();
+}
+
+function renderizarAbonos() {
+  var tbody = document.querySelector('#abonos-table tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+  abonos.forEach(function(abono, i) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">' + (i + 1) + '</td>' +
+      '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$' + abono.monto.toFixed(2) + '</td>' +
+      '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">' + abono.forma + '</td>' +
+      '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><button class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg transition-colors" onclick="eliminarAbono(' + i + ')"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function actualizarAbonosUI() {
+  var totalCarritoEl = document.getElementById('total-carrito');
+  var totalAbonadoEl = document.getElementById('total-abonado');
+  var saldoPendienteEl = document.getElementById('saldo-pendiente');
+
+  if (!totalCarritoEl || !totalAbonadoEl || !saldoPendienteEl) return;
+
+  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table tbody tr');
+  var totalCarrito = 0;
+  carritoRows.forEach(function(row) {
+    var precioText = row.querySelectorAll('td')[1];
+    if (precioText) {
+      var match = precioText.textContent.match(/\d+\.?\d*/);
+      if (match) totalCarrito += parseFloat(match[0]);
+    }
+  });
+
+  var totalAbonado = abonos.reduce(function(sum, a) { return sum + a.monto; }, 0);
+  var saldo = totalCarrito - totalAbonado;
+
+  totalCarritoEl.textContent = '$' + totalCarrito.toFixed(2);
+  totalAbonadoEl.textContent = '$' + totalAbonado.toFixed(2);
+  saldoPendienteEl.textContent = '$' + saldo.toFixed(2);
+}
+
+function marcarPagado(btn) {
+  var tr = btn.closest('tr');
+  if (!tr) return;
+  var saldoEl = tr.querySelector('.saldo-badge span');
+  if (saldoEl) {
+    saldoEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800';
+    saldoEl.textContent = 'Pagado';
+  }
+  btn.style.opacity = '0.4';
+  btn.style.pointerEvents = 'none';
+}
+
+function marcarImpreso(btn) {
+  var tr = btn.closest('tr');
+  if (!tr) return;
+  var estadoEl = tr.querySelector('.estado-badge span');
+  if (estadoEl) {
+    estadoEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800';
+    estadoEl.textContent = 'Impreso';
+  }
+}
+
+function guardarOrden() {
+  var nombre = document.querySelector('#screen-registro .max-w-4xl .grid input[placeholder="Ej. Juan Carlos"]');
+  var medico = document.querySelector('#screen-registro .max-w-4xl .grid input[placeholder="Ej. Dr. Carlos Méndez"]');
+  if (!nombre || !nombre.value.trim()) {
+    alert('Ingrese el nombre del paciente');
+    return;
+  }
+
+  var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table tbody tr');
+  if (carritoRows.length === 0) {
+    alert('Agregue al menos un an\u00e1lisis al carrito');
+    return;
+  }
+
+  var estudio = carritoRows[0].querySelectorAll('td')[0].textContent;
+  var totalCarrito = 0;
+  carritoRows.forEach(function(row) {
+    var precioText = row.querySelectorAll('td')[1];
+    if (precioText) {
+      var match = precioText.textContent.match(/\d+\.?\d*/);
+      if (match) totalCarrito += parseFloat(match[0]);
+    }
+  });
+
+  var totalAbonado = abonos.reduce(function(sum, a) { return sum + a.monto; }, 0);
+  var saldo = totalCarrito - totalAbonado;
+
+  var now = new Date();
+  var fecha = ('0' + now.getDate()).slice(-2) + '-' + ('0' + (now.getMonth()+1)).slice(-2) + '-' + String(now.getFullYear()).slice(-2);
+
+  var esPagado = saldo <= 0;
+  var saldoBadge = '';
+  if (esPagado) {
+    saldoBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Pagado</span>';
+  } else if (totalAbonado > 0) {
+    saldoBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">$' + saldo.toFixed(2) + '</span>';
+  } else {
+    saldoBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">$' + saldo.toFixed(2) + '</span>';
+  }
+
+  var pagadoStyle = esPagado ? ' style="opacity:0.4;pointer-events:none"' : '';
+
+  var tbody = document.querySelector('#screen-dashboard .overflow-hidden table tbody');
+  if (!tbody) return;
+
+  var tr = document.createElement('tr');
+  tr.className = 'hover:bg-slate-50/50 transition-colors';
+  tr.innerHTML =
+    '<td class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">' + fecha + '</td>' +
+    '<td class="px-6 py-4 text-sm font-semibold text-biomedin-blue">' + nombre.value.trim() + '</td>' +
+    '<td class="px-6 py-4 text-sm">' + estudio + '</td>' +
+    '<td class="px-6 py-4 text-sm text-slate-500">' + (medico && medico.value.trim() ? medico.value.trim() : 'A quien Corresponda') + '</td>' +
+    '<td class="px-6 py-4"><div class="flex justify-center items-center gap-3">' +
+    '<button class="p-1.5 text-slate-300 cursor-not-allowed btn-impresora" title="Imprimir" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
+    '<button class="p-1.5 text-slate-300 cursor-not-allowed btn-descargar" title="Descargar" disabled><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
+    '<button class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all marcar-pagado" title="Marcar como pagado" onclick="marcarPagado(this)"' + pagadoStyle + '><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>' +
+    '</div></td>' +
+    '<td class="px-6 py-4 estado-badge"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pendiente</span></td>' +
+    '<td class="px-6 py-4 saldo-badge">' + saldoBadge + '</td>';
+
+  tbody.appendChild(tr);
+
+  showScreen('dashboard');
+  limpiarRegistro();
+}
+
+function limpiarRegistro() {
+  var inputs = document.querySelectorAll('#screen-registro input, #screen-registro select, #screen-registro textarea');
+  inputs.forEach(function(el) { el.value = ''; });
+  var carritoTbody = document.querySelector('#screen-registro .overflow-hidden table tbody');
+  if (carritoTbody) carritoTbody.innerHTML = '';
+  var abonosTbody = document.querySelector('#abonos-table tbody');
+  if (abonosTbody) abonosTbody.innerHTML = '';
+  abonos = [];
+  actualizarTotal();
+}
+</script>
+
+</body>
+</html>
