@@ -950,11 +950,15 @@ function marcarImpreso(btn) {
 
 function guardarOrden() {
   var nombre = document.querySelector('#screen-registro .max-w-4xl .grid input[placeholder="Ej. Juan Carlos"]');
+  var apellidos = document.querySelector('#screen-registro .max-w-4xl .grid input[placeholder="Ej. Pérez García"]');
   var medico = document.querySelector('#screen-registro .max-w-4xl .grid input[placeholder="Ej. Dr. Carlos Méndez"]');
   if (!nombre || !nombre.value.trim()) {
     alert('Ingrese el nombre del paciente');
     return;
   }
+
+  function capitalizar(str) { return str.replace(/\b\w/g, function(l) { return l.toUpperCase(); }); }
+  var nombrePaciente = capitalizar(nombre.value.trim()) + (apellidos && apellidos.value.trim() ? ' ' + capitalizar(apellidos.value.trim()) : '');
 
   var carritoRows = document.querySelectorAll('#screen-registro .overflow-hidden table:not(#abonos-table) tbody tr');
   if (carritoRows.length === 0) {
@@ -992,7 +996,6 @@ function guardarOrden() {
   var tbody = document.querySelector('#screen-dashboard .overflow-hidden table tbody');
   if (!tbody) return;
 
-  var nombrePaciente = nombre.value.trim();
   var medicoNombre = medico && medico.value.trim() ? medico.value.trim() : 'A quien Corresponda';
 
   carritoRows.forEach(function(row) {
